@@ -367,6 +367,12 @@ function formShape(shapeName) {
         case 'flower':
             points = ShapeGenerator.generateFlower(centerX, centerY, size * 0.5, swarm.bots.length);
             break;
+        case 'thumbsup':
+            points = ShapeGenerator.generateThumbsUp(centerX, centerY, size * 0.6, swarm.bots.length);
+            break;
+        case 'spider':
+            points = ShapeGenerator.generateSpider(centerX, centerY, size * 0.6, swarm.bots.length);
+            break;
     }
     
     if (points.length > 0) {

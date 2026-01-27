@@ -381,18 +381,21 @@ class ShapeGenerator {
      */
     static generateLightning(centerX, centerY, height, numPoints = 500) {
         const points = [];
-        const segments = 8;
+        const segments = 10;
         const segmentHeight = height / segments;
-        const zigzagWidth = 40;
+        const zigzagWidth = 60;
         
         let currentX = centerX;
         let currentY = centerY - height / 2;
         
         const pathPoints = [{ x: currentX, y: currentY }];
         
+        // Cria o caminho em zig-zag
         for (let i = 0; i < segments; i++) {
             currentY += segmentHeight;
-            currentX += (Math.random() - 0.5) * zigzagWidth;
+            // Alterna entre esquerda e direita com variação
+            const direction = (i % 2 === 0) ? 1 : -1;
+            currentX += direction * (zigzagWidth * 0.5 + Math.random() * zigzagWidth * 0.5);
             pathPoints.push({ x: currentX, y: currentY });
         }
         
@@ -408,11 +411,32 @@ class ShapeGenerator {
                 const x = p1.x + (p2.x - p1.x) * t;
                 const y = p1.y + (p2.y - p1.y) * t;
                 
-                // Adiciona espessura ao raio
-                const thickness = 8 - (Math.abs(t - 0.5) * 10);
+                // Adiciona espessura ao raio (mais grosso no centro)
+                const thickness = 6;
                 const offsetX = (Math.random() - 0.5) * thickness;
+                const offsetY = (Math.random() - 0.5) * thickness * 0.5;
                 
-                points.push({ x: x + offsetX, y: y });
+                points.push({ x: x + offsetX, y: y + offsetY });
+            }
+        }
+        
+        // Adiciona alguns raios menores (ramificações)
+        const branches = 3;
+        const branchPoints = Math.floor(numPoints * 0.1 / branches);
+        
+        for (let b = 0; b < branches; b++) {
+            const branchStart = pathPoints[Math.floor(pathPoints.length * (0.3 + b * 0.2))];
+            const direction = (Math.random() > 0.5) ? 1 : -1;
+            
+            for (let i = 0; i < branchPoints; i++) {
+                const t = i / branchPoints;
+                const x = branchStart.x + direction * t * 30;
+                const y = branchStart.y + t * 20;
+                
+                points.push({
+                    x: x + (Math.random() - 0.5) * 3,
+                    y: y + (Math.random() - 0.5) * 3
+                });
             }
         }
         
@@ -649,6 +673,139 @@ class ShapeGenerator {
                 points.push({
                     x: centerX + petalX + offsetX,
                     y: centerY + petalY + offsetY
+                });
+            }
+        }
+        
+        return points;
+    }
+    
+    /**
+     * Gera pontos para um thumbs up (👍)
+     */
+    static generateThumbsUp(centerX, centerY, size, numPoints = 500) {
+        const points = [];
+        
+        // Polegar (parte superior)
+        const thumbPoints = Math.floor(numPoints * 0.35);
+        const thumbRadius = size * 0.15;
+        const thumbX = centerX - size * 0.15;
+        const thumbY = centerY - size * 0.25;
+        
+        for (let i = 0; i < thumbPoints; i++) {
+            const angle = (i / thumbPoints) * Math.PI * 2;
+            const r = thumbRadius * (0.5 + Math.random() * 0.5);
+            
+            points.push({
+                x: thumbX + Math.cos(angle) * r,
+                y: thumbY + Math.sin(angle) * r
+            });
+        }
+        
+        // Haste do polegar (conexão)
+        const stemPoints = Math.floor(numPoints * 0.1);
+        for (let i = 0; i < stemPoints; i++) {
+            const t = i / stemPoints;
+            const x = thumbX + t * size * 0.15;
+            const y = thumbY + t * size * 0.15;
+            const width = 15;
+            
+            points.push({
+                x: x + (Math.random() - 0.5) * width,
+                y: y + (Math.random() - 0.5) * width
+            });
+        }
+        
+        // Mão (retângulo arredondado vertical)
+        const handWidth = size * 0.35;
+        const handHeight = size * 0.5;
+        const handX = centerX;
+        const handY = centerY + size * 0.1;
+        const handPoints = Math.floor(numPoints * 0.55);
+        
+        for (let i = 0; i < handPoints; i++) {
+            const x = handX - handWidth / 2 + Math.random() * handWidth;
+            const y = handY - handHeight / 2 + Math.random() * handHeight;
+            
+            // Arredonda os cantos
+            const dx = Math.abs(x - handX) / (handWidth / 2);
+            const dy = Math.abs(y - handY) / (handHeight / 2);
+            
+            if (dx * dx + dy * dy < 1.2) {
+                points.push({ x, y });
+            }
+        }
+        
+        return points;
+    }
+    
+    /**
+     * Gera pontos para uma aranha (🕷️)
+     */
+    static generateSpider(centerX, centerY, size, numPoints = 500) {
+        const points = [];
+        
+        // Corpo (oval)
+        const bodyPoints = Math.floor(numPoints * 0.3);
+        const bodyWidth = size * 0.25;
+        const bodyHeight = size * 0.35;
+        
+        for (let i = 0; i < bodyPoints; i++) {
+            const angle = (i / bodyPoints) * Math.PI * 2;
+            const r = Math.random();
+            const x = Math.cos(angle) * bodyWidth * r;
+            const y = Math.sin(angle) * bodyHeight * r;
+            
+            points.push({
+                x: centerX + x,
+                y: centerY + y
+            });
+        }
+        
+        // Cabeça (círculo menor)
+        const headPoints = Math.floor(numPoints * 0.15);
+        const headRadius = size * 0.12;
+        const headY = centerY - bodyHeight * 0.7;
+        
+        for (let i = 0; i < headPoints; i++) {
+            const angle = (i / headPoints) * Math.PI * 2;
+            const r = headRadius * Math.random();
+            
+            points.push({
+                x: centerX + Math.cos(angle) * r,
+                y: headY + Math.sin(angle) * r
+            });
+        }
+        
+        // 8 pernas (4 de cada lado)
+        const legs = 8;
+        const legPoints = Math.floor(numPoints * 0.55 / legs);
+        
+        for (let legIndex = 0; legIndex < legs; legIndex++) {
+            const side = legIndex < 4 ? -1 : 1; // Esquerda ou direita
+            const legNum = legIndex % 4; // Número da perna no lado
+            
+            // Posição inicial da perna no corpo
+            const startY = centerY - bodyHeight * 0.3 + (legNum * bodyHeight * 0.2);
+            const startX = centerX + side * bodyWidth * 0.8;
+            
+            // Cria uma perna curvada
+            for (let i = 0; i < legPoints; i++) {
+                const t = i / legPoints;
+                
+                // Curva da perna (para cima, para fora, para baixo)
+                const angle = side * (Math.PI * 0.3 + t * Math.PI * 0.4);
+                const distance = t * size * 0.6;
+                
+                const x = startX + Math.cos(angle) * distance;
+                const y = startY + Math.sin(angle) * distance * 0.5;
+                
+                // Espessura da perna (mais fina nas pontas)
+                const thickness = (1 - t) * 3 + 1;
+                
+                points.push({
+                    x: x + (Math.random() - 0.5) * thickness,
+                    y: y + (Math.random() - 0.5) * thickness
                 });
             }
         }
