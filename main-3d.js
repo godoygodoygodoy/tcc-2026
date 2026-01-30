@@ -350,7 +350,7 @@ function applyCustomColors() {
  * Configura event listeners
  */
 function setupEventListeners() {
-    // Botão de formar texto
+    // Botão de formar TEXTO
     document.getElementById('formTextBtn').addEventListener('click', () => {
         const text = document.getElementById('textInput').value.trim();
         if (text) {
@@ -358,12 +358,26 @@ function setupEventListeners() {
         }
     });
     
-    // Enter no input de texto
+    // Botão de formar OBJETO
+    document.getElementById('formObjectBtn').addEventListener('click', () => {
+        const text = document.getElementById('textInput').value.trim();
+        if (text) {
+            formObject(text);
+        }
+    });
+    
+    // Enter no input - tenta objeto primeiro, senão texto
     document.getElementById('textInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             const text = e.target.value.trim();
             if (text) {
-                formText(text);
+                // Tenta gerar objeto, se não conseguir, faz texto
+                const objectPoints = ObjectGenerator3D.generateFromText(text, swarm.bots.length);
+                if (objectPoints) {
+                    swarm.setTargetPoints(objectPoints);
+                } else {
+                    formText(text);
+                }
             }
         }
     });
@@ -455,8 +469,8 @@ function setupEventListeners() {
         axesBtn.style.color = showAxes ? 'var(--darker-bg)' : 'var(--text-color)';
     });
     
-    // Botão tela cheia
-    document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
+    // Botão tela cheia FIXO (canto inferior direito)
+    document.getElementById('fullscreenBtnFixed').addEventListener('click', toggleFullscreen);
     
     // Botão aplicar cores
     document.getElementById('applyColorsBtn').addEventListener('click', applyCustomColors);
@@ -480,6 +494,20 @@ function formText(text) {
     
     if (points.length > 0) {
         swarm.setTargetPoints(points);
+    }
+}
+
+/**
+ * Forma um objeto baseado na descrição
+ */
+function formObject(text) {
+    const points = ObjectGenerator3D.generateFromText(text, swarm.bots.length);
+    
+    if (points) {
+        swarm.setTargetPoints(points);
+    } else {
+        // Se não encontrou objeto, mostra mensagem
+        alert(`Objeto "${text}" não reconhecido. Tente:\n\n🦆 Animais: pato, pássaro, peixe, borboleta\n✈️ Veículos: avião, carro, foguete\n🏠 Outros: casa, árvore, coração, estrela`);
     }
 }
 

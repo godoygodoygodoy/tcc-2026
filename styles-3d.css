@@ -72,6 +72,60 @@
     transition: color 0.3s ease;
 }
 
+/* Botão de tela cheia fixo (canto inferior direito) */
+.fullscreen-btn-fixed {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(255, 107, 157, 0.15));
+    border: 2px solid rgba(0, 212, 255, 0.5);
+    border-radius: 12px;
+    color: var(--primary-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    z-index: 100;
+}
+
+.fullscreen-btn-fixed:hover {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.3), rgba(255, 107, 157, 0.3));
+    border-color: var(--primary-color);
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+}
+
+.fullscreen-btn-fixed svg {
+    filter: drop-shadow(0 0 5px rgba(0, 212, 255, 0.5));
+}
+
+/* Botões de comando (Texto vs Objeto) */
+.command-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.command-buttons .btn {
+    flex: 1;
+}
+
+.btn-accent {
+    background: linear-gradient(135deg, #ff6b9d, #c44569);
+    color: white;
+    border: none;
+}
+
+.btn-accent:hover {
+    background: linear-gradient(135deg, #ff8eb3, #d55a7e);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 107, 157, 0.4);
+}
+
 /* Controles de cor */
 .color-control {
     display: flex;

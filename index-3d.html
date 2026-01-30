@@ -38,14 +38,24 @@
                 <div class="controls-hint">
                     <p>🖱️ Arraste para rotacionar | 🔄 Scroll para zoom | ⌨️ Setas para mover câmera</p>
                 </div>
+                
+                <!-- Botão de tela cheia fixo -->
+                <button id="fullscreenBtnFixed" class="fullscreen-btn-fixed" title="Modo Tela Cheia">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                    </svg>
+                </button>
             </div>
 
             <aside class="control-panel">
                 <div class="panel-section">
                     <h3>📝 Comandos</h3>
                     <div class="command-input">
-                        <input type="text" id="textInput" placeholder="Digite uma palavra..." maxlength="15">
-                        <button id="formTextBtn" class="btn btn-primary">Formar Texto</button>
+                        <input type="text" id="textInput" placeholder="Digite texto ou objeto..." maxlength="30">
+                        <div class="command-buttons">
+                            <button id="formTextBtn" class="btn btn-primary">📝 Texto</button>
+                            <button id="formObjectBtn" class="btn btn-accent">🎨 Objeto</button>
+                        </div>
                     </div>
                 </div>
 
@@ -117,7 +127,6 @@
                 <div class="panel-section">
                     <h3>🎥 Visualização</h3>
                     <div class="button-grid">
-                        <button id="fullscreenBtn" class="btn btn-primary">🖵 Tela Cheia</button>
                         <button id="autoRotateBtn" class="btn btn-secondary">Auto-Rotação</button>
                         <button id="gridBtn" class="btn btn-secondary">Grid</button>
                         <button id="axesBtn" class="btn btn-secondary">Eixos</button>
@@ -147,6 +156,7 @@
     <script src="microbot-3d.js"></script>
     <script src="swarm-3d.js"></script>
     <script src="shapes-3d.js"></script>
+    <script src="object-generator-3d.js"></script>
     <script src="main-3d.js"></script>
 </body>
 </html>
