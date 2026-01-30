@@ -3,9 +3,78 @@
  * Versão tridimensional inspirada nos microbots do filme Big Hero 6
  */
 class Microbot3D {
-    // Modelo 3D compartilhado (será carregado uma vez e clonado para todos)
-    static sharedModel = null;
+    // Modelo 3D compartilhado (geometria procedural)
+    static sharedGeometry = null;
     static modelLoaded = false;
+    
+    /**
+     * Cria geometria procedural inspirada no Big Hero 6
+     * Formato hexagonal achatado com detalhes magnéticos
+     */
+    static createBigHeroGeometry() {
+        if (Microbot3D.sharedGeometry) {
+            return Microbot3D.sharedGeometry;
+        }
+        
+        const group = new THREE.Group();
+        
+        // Corpo principal - hexágono achatado
+        const hexRadius = 2;
+        const hexHeight = 0.4;
+        const hexGeometry = new THREE.CylinderGeometry(hexRadius, hexRadius, hexHeight, 6);
+        const bodyMaterial = new THREE.MeshStandardMaterial({
+            color: 0x1a1a2e,
+            metalness: 0.9,
+            roughness: 0.2
+        });
+        const hexBody = new THREE.Mesh(hexGeometry, bodyMaterial);
+        group.add(hexBody);
+        
+        // Anel central luminoso
+        const ringGeometry = new THREE.TorusGeometry(1.2, 0.15, 8, 16);
+        const ringMaterial = new THREE.MeshStandardMaterial({
+            color: 0x00d4ff,
+            emissive: 0x00d4ff,
+            emissiveIntensity: 0.8,
+            metalness: 0.5,
+            roughness: 0.3
+        });
+        const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+        ring.rotation.x = Math.PI / 2;
+        group.add(ring);
+        
+        // Núcleo central (esfera pequena)
+        const coreGeometry = new THREE.SphereGeometry(0.5, 12, 12);
+        const coreMaterial = new THREE.MeshStandardMaterial({
+            color: 0x00ffff,
+            emissive: 0x00ffff,
+            emissiveIntensity: 1.0,
+            metalness: 0.3,
+            roughness: 0.2
+        });
+        const core = new THREE.Mesh(coreGeometry, coreMaterial);
+        group.add(core);
+        
+        // Conectores magnéticos nas 6 pontas
+        const connectorGeometry = new THREE.SphereGeometry(0.3, 8, 8);
+        const connectorMaterial = new THREE.MeshStandardMaterial({
+            color: 0x4a5568,
+            metalness: 1.0,
+            roughness: 0.1
+        });
+        
+        for (let i = 0; i < 6; i++) {
+            const angle = (i * Math.PI * 2) / 6;
+            const connector = new THREE.Mesh(connectorGeometry, connectorMaterial);
+            connector.position.x = Math.cos(angle) * hexRadius;
+            connector.position.z = Math.sin(angle) * hexRadius;
+            group.add(connector);
+        }
+        
+        Microbot3D.sharedGeometry = group;
+        Microbot3D.modelLoaded = true;
+        return group;
+    }
     
     constructor(x, y, z, scene) {
         this.position = new THREE.Vector3(x, y, z);
@@ -34,48 +103,40 @@ class Microbot3D {
     }
     
     /**
-     * Cria o mesh 3D do microbot (usa modelo customizado se disponível)
+     * Cria o mesh 3D do microbot (usa geometria procedural Big Hero 6)
      */
     createMesh(scene) {
-        // Se temos um modelo customizado, clonar ele
-        if (Microbot3D.sharedModel) {
-            this.mesh = Microbot3D.sharedModel.clone();
-            
-            // Aplicar material com cores personalizadas
-            this.mesh.traverse((child) => {
-                if (child.isMesh) {
-                    child.material = new THREE.MeshStandardMaterial({
-                        color: 0x141928,
-                        emissive: 0x00d4ff,
-                        emissiveIntensity: 0.2,
-                        metalness: 0.8,
-                        roughness: 0.2
-                    });
+        // Criar geometria procedural se ainda não existe
+        if (!Microbot3D.sharedGeometry) {
+            Microbot3D.createBigHeroGeometry();
+        }
+        
+        // Clonar o modelo compartilhado
+        this.mesh = Microbot3D.sharedGeometry.clone();
+        
+        // Aplicar materiais com variação de cor
+        this.mesh.traverse((child) => {
+            if (child.isMesh && child.material) {
+                // Clonar material para permitir animações individuais
+                child.material = child.material.clone();
+                
+                // Guardar referência ao material emissivo (anel central)
+                if (child.material.emissiveIntensity > 0.5) {
+                    this.material = child.material;
                 }
-            });
-            
-            this.material = this.mesh.children[0] ? this.mesh.children[0].material : null;
-        } else {
-            // Fallback: usar octaedro se modelo não carregou
-            const geometry = new THREE.OctahedronGeometry(2, 0);
-            
-            // Material com emissão para efeito de brilho
-            this.material = new THREE.MeshStandardMaterial({
-                color: 0x141928,
-                emissive: 0x00d4ff,
-                emissiveIntensity: 0.2,
-                metalness: 0.8,
-                roughness: 0.2
-            });
-            
-            this.mesh = new THREE.Mesh(geometry, this.material);
+            }
+        });
+        
+        // Se não encontrou material emissivo, usar o primeiro
+        if (!this.material && this.mesh.children[0]) {
+            this.material = this.mesh.children[0].material;
         }
         
         this.mesh.position.copy(this.position);
         
-        // Adiciona luz pontual interna (opcional, remove se lag)
-        this.pointLight = new THREE.PointLight(0x00d4ff, 0, 10);
-        this.mesh.add(this.pointLight);
+        // NÃO adicionar luz individual (causa shader error com muitos bots)
+        // this.pointLight = new THREE.PointLight(0x00d4ff, 0, 10);
+        // this.mesh.add(this.pointLight);
         
         scene.add(this.mesh);
     }
@@ -222,10 +283,9 @@ class Microbot3D {
             );
         }
         
-        // Atualiza efeito de brilho
-        this.material.emissiveIntensity = 0.2 + this.glowIntensity * 0.8;
-        if (this.pointLight) {
-            this.pointLight.intensity = this.glowIntensity * 0.5;
+        // Atualiza efeito de brilho (apenas no material)
+        if (this.material) {
+            this.material.emissiveIntensity = 0.2 + this.glowIntensity * 0.8;
         }
     }
     
