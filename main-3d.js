@@ -316,11 +316,11 @@ function applyCustomColors() {
     // Atualizar todos os microbots
     swarm.bots.forEach(bot => {
         bot.mesh.traverse((child) => {
-            if (child.isMesh && child.material) {
-                // Materiais do corpo (não emissivos)
-                if (child.material.emissiveIntensity < 0.5) {
+            if (child.isMesh && child.material && child.material.userData) {
+                if (child.material.userData.type === 'body') {
+                    // Materiais do corpo (escuros)
                     child.material.color.setStyle(bodyColor);
-                } else {
+                } else if (child.material.userData.type === 'glow') {
                     // Materiais luminosos
                     child.material.color.setStyle(glowColor);
                     child.material.emissive.setStyle(glowColor);
@@ -332,10 +332,10 @@ function applyCustomColors() {
     // Atualizar geometria compartilhada para próximos bots
     if (Microbot3D.sharedGeometry) {
         Microbot3D.sharedGeometry.traverse((child) => {
-            if (child.isMesh && child.material) {
-                if (child.material.emissiveIntensity < 0.5) {
+            if (child.isMesh && child.material && child.material.userData) {
+                if (child.material.userData.type === 'body') {
                     child.material.color.setStyle(bodyColor);
-                } else {
+                } else if (child.material.userData.type === 'glow') {
                     child.material.color.setStyle(glowColor);
                     child.material.emissive.setStyle(glowColor);
                 }

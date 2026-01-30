@@ -26,6 +26,7 @@ class Microbot3D {
             metalness: 0.9,
             roughness: 0.2
         });
+        coreMaterial.userData = { type: 'body' };
         const core = new THREE.Mesh(coreGeometry, coreMaterial);
         group.add(core);
         
@@ -36,6 +37,7 @@ class Microbot3D {
             metalness: 1.0,
             roughness: 0.1
         });
+        ringMaterial.userData = { type: 'body' };
         
         // Anel horizontal
         const ring1 = new THREE.Mesh(ringGeometry, ringMaterial);
@@ -72,6 +74,7 @@ class Microbot3D {
             metalness: 0.8,
             roughness: 0.3
         });
+        bladeMaterial.userData = { type: 'body' };
         
         // Lâmina 1
         const blade1 = new THREE.Mesh(bladeGeometry, bladeMaterial);
@@ -79,7 +82,8 @@ class Microbot3D {
         group.add(blade1);
         
         // Lâmina 2 (oposta, 180 graus)
-        const blade2 = new THREE.Mesh(bladeGeometry, bladeMaterial);
+        const blade2 = new THREE.Mesh(bladeGeometry, bladeMaterial.clone());
+        blade2.material.userData = { type: 'body' };
         blade2.rotation.z = Math.PI;
         blade2.position.z = -bladeThickness/2;
         group.add(blade2);
@@ -93,6 +97,8 @@ class Microbot3D {
             metalness: 0.3,
             roughness: 0.2
         });
+        glowMaterial.userData = { type: 'glow' };
+        glowMaterial.userData = { type: 'glow' };
         
         // 4 pontos luminosos (nas 4 pontas)
         const positions = [
@@ -104,6 +110,7 @@ class Microbot3D {
         
         positions.forEach(pos => {
             const glow = new THREE.Mesh(glowGeometry, glowMaterial.clone());
+            glow.material.userData = { type: 'glow' };
             glow.position.copy(pos);
             group.add(glow);
         });
@@ -111,6 +118,7 @@ class Microbot3D {
         // Luz central
         const centerGlowGeometry = new THREE.SphereGeometry(0.3, 12, 12);
         const centerGlow = new THREE.Mesh(centerGlowGeometry, glowMaterial.clone());
+        centerGlow.material.userData = { type: 'glow' };
         group.add(centerGlow);
         
         Microbot3D.sharedGeometry = group;
@@ -131,9 +139,9 @@ class Microbot3D {
         this.target = new THREE.Vector3(x, y, z);
         this.hasTarget = false;
         
-        // Limites
-        this.maxSpeed = 3;
-        this.maxForce = 0.1;
+        // Limites (AJUSTADOS para movimentos mais controlados e coesos)
+        this.maxSpeed = 2.5;      // Reduzido de 3
+        this.maxForce = 0.15;     // Aumentado de 0.1
         
         // Estado
         this.neighbors = [];

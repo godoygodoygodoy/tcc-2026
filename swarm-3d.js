@@ -9,15 +9,15 @@ class Swarm3D {
         this.targetPoints = [];
         this.behaviorMode = 'idle'; // idle, forming, dispersing
         
-        // Parâmetros de comportamento
-        this.cohesionStrength = 1.0;
-        this.separationStrength = 1.5;
-        this.alignmentStrength = 1.0;
-        this.seekStrength = 2.0;
+        // Parâmetros de comportamento (AJUSTADOS para ficarem mais coesos)
+        this.cohesionStrength = 1.5;        // Aumentado de 1.0
+        this.separationStrength = 2.0;       // Aumentado de 1.5
+        this.alignmentStrength = 1.2;        // Aumentado de 1.0
+        this.seekStrength = 3.5;             // Aumentado de 2.0
         this.speedMultiplier = 1.0;
         
-        // Raio de percepção
-        this.perceptionRadius = 50;
+        // Raio de percepção (REDUZIDO para mais coesão)
+        this.perceptionRadius = 35;          // Reduzido de 50
         
         // Estado
         this.isPaused = false;
