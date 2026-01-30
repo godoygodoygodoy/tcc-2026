@@ -40,8 +40,8 @@ function init() {
         // Cria a cena
         console.log('Criando cena...');
         scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x050816);
-        scene.fog = new THREE.Fog(0x050816, 200, 600);
+        scene.background = new THREE.Color(0x1a1f35);
+        scene.fog = new THREE.Fog(0x1a1f35, 200, 600);
         
         // Cria a câmera
         console.log('Criando câmera...');
@@ -251,6 +251,102 @@ function onWindowResize() {
 }
 
 /**
+ * Ativa/desativa modo tela cheia
+ */
+function toggleFullscreen() {
+    const container = document.getElementById('scene-container');
+    
+    if (!document.fullscreenElement) {
+        container.requestFullscreen().then(() => {
+            container.classList.add('fullscreen-mode');
+            createFullscreenControls();
+            onWindowResize();
+        }).catch(err => {
+            console.error('Erro ao entrar em tela cheia:', err);
+        });
+    } else {
+        document.exitFullscreen().then(() => {
+            container.classList.remove('fullscreen-mode');
+            removeFullscreenControls();
+            onWindowResize();
+        });
+    }
+}
+
+/**
+ * Cria controles flutuantes para modo tela cheia
+ */
+function createFullscreenControls() {
+    const existing = document.getElementById('fullscreen-controls-overlay');
+    if (existing) return;
+    
+    const overlay = document.createElement('div');
+    overlay.id = 'fullscreen-controls-overlay';
+    overlay.className = 'fullscreen-controls';
+    overlay.innerHTML = `
+        <button class="btn btn-secondary" onclick="formShape('sphere')">🔮 Esfera</button>
+        <button class="btn btn-secondary" onclick="formShape('cube')">🧊 Cubo</button>
+        <button class="btn btn-secondary" onclick="formShape('heart')">❤️ Coração</button>
+        <button class="btn btn-secondary" onclick="formShape('star')">⭐ Estrela</button>
+        <button class="btn btn-secondary" onclick="formShape('dna')">🧬 DNA</button>
+        <button class="btn btn-danger" onclick="toggleFullscreen()">✕ Sair</button>
+    `;
+    document.body.appendChild(overlay);
+}
+
+/**
+ * Remove controles flutuantes
+ */
+function removeFullscreenControls() {
+    const overlay = document.getElementById('fullscreen-controls-overlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
+/**
+ * Aplica cores personalizadas aos microbots
+ */
+function applyCustomColors() {
+    const bodyColor = document.getElementById('bodyColorPicker').value;
+    const glowColor = document.getElementById('glowColorPicker').value;
+    
+    console.log('Aplicando cores:', bodyColor, glowColor);
+    
+    // Atualizar todos os microbots
+    swarm.bots.forEach(bot => {
+        bot.mesh.traverse((child) => {
+            if (child.isMesh && child.material) {
+                // Materiais do corpo (não emissivos)
+                if (child.material.emissiveIntensity < 0.5) {
+                    child.material.color.setStyle(bodyColor);
+                } else {
+                    // Materiais luminosos
+                    child.material.color.setStyle(glowColor);
+                    child.material.emissive.setStyle(glowColor);
+                }
+            }
+        });
+    });
+    
+    // Atualizar geometria compartilhada para próximos bots
+    if (Microbot3D.sharedGeometry) {
+        Microbot3D.sharedGeometry.traverse((child) => {
+            if (child.isMesh && child.material) {
+                if (child.material.emissiveIntensity < 0.5) {
+                    child.material.color.setStyle(bodyColor);
+                } else {
+                    child.material.color.setStyle(glowColor);
+                    child.material.emissive.setStyle(glowColor);
+                }
+            }
+        });
+    }
+    
+    console.log('Cores aplicadas com sucesso!');
+}
+
+/**
  * Configura event listeners
  */
 function setupEventListeners() {
@@ -358,6 +454,22 @@ function setupEventListeners() {
             : 'var(--dark-bg)';
         axesBtn.style.color = showAxes ? 'var(--darker-bg)' : 'var(--text-color)';
     });
+    
+    // Botão tela cheia
+    document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
+    
+    // Botão aplicar cores
+    document.getElementById('applyColorsBtn').addEventListener('click', applyCustomColors);
+    
+    // Listener para sair de tela cheia com ESC
+    document.addEventListener('fullscreenchange', () => {
+        const container = document.getElementById('scene-container');
+        if (!document.fullscreenElement) {
+            container.classList.remove('fullscreen-mode');
+            removeFullscreenControls();
+            onWindowResize();
+        }
+    });
 }
 
 /**
@@ -406,9 +518,23 @@ function formShape(shapeName) {
         case 'snow':
             points = ShapeGenerator3D.generateSnow3D(size * 0.6, swarm.bots.length);
             break;
+        case 'smile':
+            points = ShapeGenerator3D.generateSmile(size * 0.6, swarm.bots.length);
+            break;
+        case 'thumbsup':
+            points = ShapeGenerator3D.generateThumbsUp(size * 0.8, swarm.bots.length);
+            break;
+        case 'spider':
+            points = ShapeGenerator3D.generateSpider(size * 0.6, swarm.bots.length);
+            break;
+        case 'wave':
+            points = ShapeGenerator3D.generateWave(size * 0.6, swarm.bots.length);
+            break;
+        case 'lightning':
+            points = ShapeGenerator3D.generateLightning(size * 0.8, swarm.bots.length);
+            break;
         default:
-            // Para símbolos 2D, converte para 3D
-            console.log(`Shape ${shapeName} usando conversão 2D->3D`);
+            console.log(`Shape ${shapeName} não encontrada`);
             return;
     }
     

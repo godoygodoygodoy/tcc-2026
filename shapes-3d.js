@@ -123,14 +123,14 @@ class ShapeGenerator3D {
             const t = (i / numPoints) * Math.PI * 2;
             const u = (Math.random() - 0.5) * Math.PI;
             
-            // Equação paramétrica 3D de um coração
+            // Equação paramétrica 3D de um coração (CORRIGIDA - não invertida)
             const x = size * 16 * Math.pow(Math.sin(t), 3);
             const y = size * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
             const z = size * 10 * Math.sin(u);
             
             points.push({
                 x: x / 20 + (Math.random() - 0.5) * 3,
-                y: -y / 20 + (Math.random() - 0.5) * 3,
+                y: y / 20 + (Math.random() - 0.5) * 3,  // Removido o sinal negativo
                 z: z / 20 + (Math.random() - 0.5) * 3
             });
         }
@@ -298,6 +298,188 @@ class ShapeGenerator3D {
                     });
                 }
             }
+        }
+        
+        return points;
+    }
+    
+    /**
+     * Gera pontos para um smile (rosto sorridente) em 3D
+     */
+    static generateSmile(size, numPoints = 300) {
+        const points = [];
+        const radius = size;
+        
+        // Círculo da face (metade dos pontos)
+        for (let i = 0; i < numPoints * 0.5; i++) {
+            const angle = (i / (numPoints * 0.5)) * Math.PI * 2;
+            points.push({
+                x: Math.cos(angle) * radius + (Math.random() - 0.5) * 3,
+                y: Math.sin(angle) * radius + (Math.random() - 0.5) * 3,
+                z: (Math.random() - 0.5) * 10
+            });
+        }
+        
+        // Olhos (2 círculos pequenos)
+        for (let i = 0; i < numPoints * 0.15; i++) {
+            const angle = (i / (numPoints * 0.15)) * Math.PI * 2;
+            const eyeRadius = radius * 0.15;
+            // Olho esquerdo
+            points.push({
+                x: -radius * 0.3 + Math.cos(angle) * eyeRadius,
+                y: radius * 0.3 + Math.sin(angle) * eyeRadius,
+                z: (Math.random() - 0.5) * 5
+            });
+            // Olho direito
+            points.push({
+                x: radius * 0.3 + Math.cos(angle) * eyeRadius,
+                y: radius * 0.3 + Math.sin(angle) * eyeRadius,
+                z: (Math.random() - 0.5) * 5
+            });
+        }
+        
+        // Sorriso (arco)
+        for (let i = 0; i < numPoints * 0.2; i++) {
+            const angle = Math.PI * 0.2 + (i / (numPoints * 0.2)) * Math.PI * 0.6;
+            const smileRadius = radius * 0.6;
+            points.push({
+                x: Math.cos(angle) * smileRadius,
+                y: -radius * 0.2 + Math.sin(angle) * smileRadius * 0.5,
+                z: (Math.random() - 0.5) * 5
+            });
+        }
+        
+        return points;
+    }
+    
+    /**
+     * Gera pontos para thumbs up (👍) em 3D
+     */
+    static generateThumbsUp(size, numPoints = 300) {
+        const points = [];
+        
+        // Polegar (parte superior)
+        for (let i = 0; i < numPoints * 0.4; i++) {
+            const t = i / (numPoints * 0.4);
+            const angle = t * Math.PI;
+            points.push({
+                x: Math.cos(angle) * size * 0.3 + size * 0.2,
+                y: Math.sin(angle) * size * 0.4 + size * 0.5,
+                z: (Math.random() - 0.5) * size * 0.3
+            });
+        }
+        
+        // Mão/Punho (retângulo)
+        for (let i = 0; i < numPoints * 0.6; i++) {
+            points.push({
+                x: (Math.random() - 0.5) * size * 0.6,
+                y: (Math.random() - 0.8) * size * 0.6,
+                z: (Math.random() - 0.5) * size * 0.3
+            });
+        }
+        
+        return points;
+    }
+    
+    /**
+     * Gera pontos para aranha (🕷️) em 3D
+     */
+    static generateSpider(size, numPoints = 300) {
+        const points = [];
+        
+        // Corpo (2 esferas)
+        for (let i = 0; i < numPoints * 0.3; i++) {
+            const phi = Math.acos(1 - 2 * (i / (numPoints * 0.3)));
+            const theta = Math.PI * (3 - Math.sqrt(5)) * i;
+            
+            // Abdômen
+            points.push({
+                x: Math.sin(phi) * Math.cos(theta) * size * 0.3,
+                y: Math.sin(phi) * Math.sin(theta) * size * 0.3 - size * 0.3,
+                z: Math.cos(phi) * size * 0.3
+            });
+            
+            // Cabeça
+            points.push({
+                x: Math.sin(phi) * Math.cos(theta) * size * 0.2,
+                y: Math.sin(phi) * Math.sin(theta) * size * 0.2 + size * 0.3,
+                z: Math.cos(phi) * size * 0.2
+            });
+        }
+        
+        // 8 pernas
+        const legsPerSide = 4;
+        for (let leg = 0; leg < 8; leg++) {
+            const side = leg < 4 ? -1 : 1;
+            const legIndex = leg % 4;
+            const legPoints = Math.floor(numPoints * 0.4 / 8);
+            
+            for (let i = 0; i < legPoints; i++) {
+                const t = i / legPoints;
+                const angle = side * (Math.PI / 3 + legIndex * Math.PI / 6);
+                
+                points.push({
+                    x: side * (t * size * 0.8) * Math.cos(angle),
+                    y: (t * size * 0.8) * Math.sin(angle),
+                    z: -t * size * 0.3 + (Math.random() - 0.5) * 5
+                });
+            }
+        }
+        
+        return points;
+    }
+    
+    /**
+     * Gera pontos para onda (~) em 3D
+     */
+    static generateWave(size, numPoints = 300) {
+        const points = [];
+        const wavelength = size * 2;
+        const amplitude = size * 0.5;
+        
+        for (let i = 0; i < numPoints; i++) {
+            const t = (i / numPoints) * Math.PI * 4;
+            const x = (t / (Math.PI * 4)) * wavelength - wavelength / 2;
+            const y = Math.sin(t) * amplitude;
+            const z = Math.cos(t * 0.5) * (size * 0.3);
+            
+            points.push({
+                x: x + (Math.random() - 0.5) * 5,
+                y: y + (Math.random() - 0.5) * 5,
+                z: z + (Math.random() - 0.5) * 10
+            });
+        }
+        
+        return points;
+    }
+    
+    /**
+     * Gera pontos para raio (⚡) em 3D
+     */
+    static generateLightning(size, numPoints = 300) {
+        const points = [];
+        const segments = 8;
+        const pointsPerSegment = Math.floor(numPoints / segments);
+        
+        let currentX = 0;
+        let currentY = size;
+        
+        for (let seg = 0; seg < segments; seg++) {
+            const nextX = currentX + (Math.random() - 0.5) * size * 0.4;
+            const nextY = currentY - size * 0.3;
+            
+            for (let i = 0; i < pointsPerSegment; i++) {
+                const t = i / pointsPerSegment;
+                
+                points.push({
+                    x: currentX + (nextX - currentX) * t + (Math.random() - 0.5) * 5,
+                    y: currentY + (nextY - currentY) * t + (Math.random() - 0.5) * 5,
+                    z: (Math.random() - 0.5) * size * 0.2
+                });
+            }
+            
+            currentX = nextX;
+            currentY = nextY;
         }
         
         return points;

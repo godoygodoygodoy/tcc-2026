@@ -72,6 +72,91 @@
     transition: color 0.3s ease;
 }
 
+/* Controles de cor */
+.color-control {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.color-control label {
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.color-control input[type="color"] {
+    width: 60px;
+    height: 35px;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.3s ease;
+}
+
+.color-control input[type="color"]:hover {
+    border-color: var(--primary-color);
+    transform: scale(1.05);
+}
+
+/* Botão de tela cheia */
+#fullscreenBtn {
+    position: relative;
+    overflow: hidden;
+}
+
+#fullscreenBtn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+#fullscreenBtn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Modo tela cheia */
+.fullscreen-mode {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+}
+
+.fullscreen-controls {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    max-width: 300px;
+}
+
+.fullscreen-controls .btn {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    opacity: 0.9;
+}
+
+.fullscreen-controls .btn:hover {
+    opacity: 1;
+}
+
 /* Indicador de baixo FPS */
 .fps-warning {
     color: #ff6b6b !important;
