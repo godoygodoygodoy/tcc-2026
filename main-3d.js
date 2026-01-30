@@ -22,62 +22,113 @@ let showAxes = true;
  * Inicializa a aplicação 3D
  */
 function init() {
+    console.log('=== INICIANDO APLICAÇÃO 3D ===');
+    console.log('THREE disponível?', typeof THREE !== 'undefined');
+    console.log('THREE.OrbitControls disponível?', typeof THREE.OrbitControls !== 'undefined');
+    
     const container = document.getElementById('scene-container');
+    console.log('Container encontrado?', container !== null);
     
-    // Cria a cena
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x050816);
-    scene.fog = new THREE.Fog(0x050816, 200, 600);
+    if (typeof THREE === 'undefined') {
+        alert('ERRO: Three.js não carregou! Verifique sua conexão com a internet.');
+        document.getElementById('status').textContent = 'ERRO: Three.js não carregou';
+        document.getElementById('status').style.color = '#ff0000';
+        return;
+    }
     
-    // Cria a câmera
-    const aspect = container.clientWidth / container.clientHeight;
-    camera = new THREE.PerspectiveCamera(60, aspect, 1, 2000);
-    camera.position.set(0, 150, 400);
-    camera.lookAt(0, 0, 0);
-    
-    // Cria o renderer
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    container.appendChild(renderer.domElement);
-    
-    // Controles de órbita
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.minDistance = 100;
-    controls.maxDistance = 800;
-    
-    // Iluminação
-    setupLights();
-    
-    // Grid e eixos
-    gridHelper = new THREE.GridHelper(500, 50, 0x00d4ff, 0x1e2a47);
-    gridHelper.position.y = -bounds.y;
-    scene.add(gridHelper);
-    
-    axesHelper = new THREE.AxesHelper(200);
-    scene.add(axesHelper);
-    
-    // Cria o swarm
-    swarm = new Swarm3D(scene, bounds);
-    swarm.initialize(300);
-    
-    // Setup dos event listeners
-    setupEventListeners();
-    
-    // Resize handler
-    window.addEventListener('resize', onWindowResize);
-    
-    // Inicia a animação
-    animate(0);
-    
-    // Mensagem de boas-vindas
-    setTimeout(() => {
-        formText('3D');
-    }, 500);
+    try {
+        // Cria a cena
+        console.log('Criando cena...');
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050816);
+        scene.fog = new THREE.Fog(0x050816, 200, 600);
+        
+        // Cria a câmera
+        console.log('Criando câmera...');
+        const aspect = container.clientWidth / container.clientHeight;
+        camera = new THREE.PerspectiveCamera(60, aspect, 1, 2000);
+        camera.position.set(0, 150, 400);
+        camera.lookAt(0, 0, 0);
+        
+        // Cria o renderer
+        console.log('Criando renderer...');
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+        console.log('Renderer adicionado ao container');
+        
+        // Controles de órbita
+        console.log('Criando controles...');
+        if (typeof THREE.OrbitControls === 'undefined') {
+            console.error('OrbitControls não disponível!');
+            alert('ERRO: OrbitControls não carregou!');
+            return;
+        }
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 100;
+        controls.maxDistance = 800;
+        console.log('Controles criados');
+        
+        // Iluminação
+        console.log('Configurando luzes...');
+        setupLights();
+        
+        // Grid e eixos
+        console.log('Criando helpers...');
+        gridHelper = new THREE.GridHelper(500, 50, 0x00d4ff, 0x1e2a47);
+        gridHelper.position.y = -bounds.y;
+        scene.add(gridHelper);
+        
+        axesHelper = new THREE.AxesHelper(200);
+        scene.add(axesHelper);
+        console.log('Helpers adicionados');
+        
+        // Cria o swarm
+        console.log('Criando swarm...');
+        console.log('Microbot3D disponível?', typeof Microbot3D !== 'undefined');
+        console.log('Swarm3D disponível?', typeof Swarm3D !== 'undefined');
+        
+        if (typeof Microbot3D === 'undefined' || typeof Swarm3D === 'undefined') {
+            alert('ERRO: Classes Microbot3D ou Swarm3D não carregaram!');
+            document.getElementById('status').textContent = 'ERRO: Classes não carregadas';
+            document.getElementById('status').style.color = '#ff0000';
+            return;
+        }
+        
+        swarm = new Swarm3D(scene, bounds);
+        swarm.initialize(300);
+        console.log('Swarm criado com', swarm.bots.length, 'bots');
+        
+        // Setup dos event listeners
+        console.log('Configurando event listeners...');
+        setupEventListeners();
+        
+        // Resize handler
+        window.addEventListener('resize', onWindowResize);
+        
+        // Inicia a animação
+        console.log('Iniciando loop de animação...');
+        animate(0);
+        
+        // Mensagem de boas-vindas
+        setTimeout(() => {
+            console.log('Formando texto 3D...');
+            formText('3D');
+        }, 500);
+        
+        console.log('=== INICIALIZAÇÃO COMPLETA ===');
+        
+    } catch (error) {
+        console.error('ERRO na inicialização:', error);
+        alert('ERRO: ' + error.message);
+        document.getElementById('status').textContent = 'ERRO: ' + error.message;
+        document.getElementById('status').style.color = '#ff0000';
+    }
 }
 
 /**
