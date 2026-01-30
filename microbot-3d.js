@@ -3,6 +3,10 @@
  * Versão tridimensional inspirada nos microbots do filme Big Hero 6
  */
 class Microbot3D {
+    // Modelo 3D compartilhado (será carregado uma vez e clonado para todos)
+    static sharedModel = null;
+    static modelLoaded = false;
+    
     constructor(x, y, z, scene) {
         this.position = new THREE.Vector3(x, y, z);
         this.velocity = new THREE.Vector3(
@@ -30,22 +34,43 @@ class Microbot3D {
     }
     
     /**
-     * Cria o mesh 3D do microbot (hexágono/esfera pequena)
+     * Cria o mesh 3D do microbot (usa modelo customizado se disponível)
      */
     createMesh(scene) {
-        // Geometria: pequena esfera ou octaedro para performance
-        const geometry = new THREE.OctahedronGeometry(2, 0);
+        // Se temos um modelo customizado, clonar ele
+        if (Microbot3D.sharedModel) {
+            this.mesh = Microbot3D.sharedModel.clone();
+            
+            // Aplicar material com cores personalizadas
+            this.mesh.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = new THREE.MeshStandardMaterial({
+                        color: 0x141928,
+                        emissive: 0x00d4ff,
+                        emissiveIntensity: 0.2,
+                        metalness: 0.8,
+                        roughness: 0.2
+                    });
+                }
+            });
+            
+            this.material = this.mesh.children[0] ? this.mesh.children[0].material : null;
+        } else {
+            // Fallback: usar octaedro se modelo não carregou
+            const geometry = new THREE.OctahedronGeometry(2, 0);
+            
+            // Material com emissão para efeito de brilho
+            this.material = new THREE.MeshStandardMaterial({
+                color: 0x141928,
+                emissive: 0x00d4ff,
+                emissiveIntensity: 0.2,
+                metalness: 0.8,
+                roughness: 0.2
+            });
+            
+            this.mesh = new THREE.Mesh(geometry, this.material);
+        }
         
-        // Material com emissão para efeito de brilho
-        this.material = new THREE.MeshStandardMaterial({
-            color: 0x141928,
-            emissive: 0x00d4ff,
-            emissiveIntensity: 0.2,
-            metalness: 0.8,
-            roughness: 0.2
-        });
-        
-        this.mesh = new THREE.Mesh(geometry, this.material);
         this.mesh.position.copy(this.position);
         
         // Adiciona luz pontual interna (opcional, remove se lag)

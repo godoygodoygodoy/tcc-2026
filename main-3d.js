@@ -19,6 +19,51 @@ let showGrid = true;
 let showAxes = true;
 
 /**
+ * Carrega o modelo 3D do microbot
+ */
+function loadMicrobotModel(callback) {
+    console.log('Carregando modelo 3D do microbot...');
+    
+    const loader = new THREE.ThreeMFLoader();
+    
+    loader.load(
+        'bigHeroNanoBot.3mf',
+        function(object) {
+            console.log('Modelo 3MF carregado com sucesso!');
+            
+            // Ajustar escala do modelo para tamanho apropriado (2 unidades)
+            const box = new THREE.Box3().setFromObject(object);
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = 4 / maxDim; // Escala para ~4 unidades
+            
+            object.scale.set(scale, scale, scale);
+            
+            // Centralizar o modelo
+            object.position.set(0, 0, 0);
+            
+            // Salvar como modelo compartilhado
+            Microbot3D.sharedModel = object;
+            Microbot3D.modelLoaded = true;
+            
+            console.log('Modelo configurado e pronto para uso');
+            callback();
+        },
+        function(xhr) {
+            const percent = (xhr.loaded / xhr.total * 100).toFixed(0);
+            console.log('Carregando modelo: ' + percent + '%');
+            document.getElementById('status').textContent = 'Carregando modelo 3D: ' + percent + '%';
+        },
+        function(error) {
+            console.error('Erro ao carregar modelo 3MF:', error);
+            console.log('Continuando com geometria padrão (octaedro)...');
+            Microbot3D.modelLoaded = false;
+            callback(); // Continua mesmo sem o modelo
+        }
+    );
+}
+
+/**
  * Inicializa a aplicação 3D
  */
 function init() {
@@ -88,40 +133,44 @@ function init() {
         scene.add(axesHelper);
         console.log('Helpers adicionados');
         
-        // Cria o swarm
-        console.log('Criando swarm...');
-        console.log('Microbot3D disponível?', typeof Microbot3D !== 'undefined');
-        console.log('Swarm3D disponível?', typeof Swarm3D !== 'undefined');
-        
-        if (typeof Microbot3D === 'undefined' || typeof Swarm3D === 'undefined') {
-            alert('ERRO: Classes Microbot3D ou Swarm3D não carregaram!');
-            document.getElementById('status').textContent = 'ERRO: Classes não carregadas';
-            document.getElementById('status').style.color = '#ff0000';
-            return;
-        }
-        
-        swarm = new Swarm3D(scene, bounds);
-        swarm.initialize(300);
-        console.log('Swarm criado com', swarm.bots.length, 'bots');
-        
-        // Setup dos event listeners
-        console.log('Configurando event listeners...');
-        setupEventListeners();
-        
-        // Resize handler
-        window.addEventListener('resize', onWindowResize);
-        
-        // Inicia a animação
-        console.log('Iniciando loop de animação...');
-        animate(0);
-        
-        // Mensagem de boas-vindas
-        setTimeout(() => {
-            console.log('Formando texto 3D...');
-            formText('3D');
-        }, 500);
-        
-        console.log('=== INICIALIZAÇÃO COMPLETA ===');
+        // Primeiro carrega o modelo 3D, depois cria o swarm
+        console.log('Iniciando carregamento do modelo 3D...');
+        loadMicrobotModel(function() {
+            // Cria o swarm após carregar o modelo
+            console.log('Criando swarm...');
+            console.log('Microbot3D disponível?', typeof Microbot3D !== 'undefined');
+            console.log('Swarm3D disponível?', typeof Swarm3D !== 'undefined');
+            
+            if (typeof Microbot3D === 'undefined' || typeof Swarm3D === 'undefined') {
+                alert('ERRO: Classes Microbot3D ou Swarm3D não carregaram!');
+                document.getElementById('status').textContent = 'ERRO: Classes não carregadas';
+                document.getElementById('status').style.color = '#ff0000';
+                return;
+            }
+            
+            swarm = new Swarm3D(scene, bounds);
+            swarm.initialize(300);
+            console.log('Swarm criado com', swarm.bots.length, 'bots');
+            
+            // Setup dos event listeners
+            console.log('Configurando event listeners...');
+            setupEventListeners();
+            
+            // Resize handler
+            window.addEventListener('resize', onWindowResize);
+            
+            // Inicia a animação
+            console.log('Iniciando loop de animação...');
+            animate(0);
+            
+            // Mensagem de boas-vindas
+            setTimeout(() => {
+                console.log('Formando texto 3D...');
+                formText('3D');
+            }, 500);
+            
+            console.log('=== INICIALIZAÇÃO COMPLETA ===');
+        });
         
     } catch (error) {
         console.error('ERRO na inicialização:', error);
