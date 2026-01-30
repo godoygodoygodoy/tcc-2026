@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Robótica Coletiva - Swarm Microbots</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Simulador 3D de Robótica Coletiva - Swarm Microbots</title>
+    <link rel="stylesheet" href="styles-3d.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Simulador de Robótica Coletiva</h1>
-            <p class="subtitle">Comportamento Emergente com Microbots Autônomos</p>
+            <h1>Simulador 3D de Robótica Coletiva</h1>
+            <p class="subtitle">Comportamento Emergente com Microbots Autônomos em 3D</p>
             <div class="version-toggle">
-                <span class="current-version">Versão 2D</span>
-                <a href="index-3d.html" class="version-link">Versão 3D →</a>
+                <a href="index.html" class="version-link">← Versão 2D</a>
+                <span class="current-version">Versão 3D</span>
             </div>
         </header>
 
         <div class="main-content">
             <div class="canvas-container">
-                <canvas id="swarmCanvas"></canvas>
+                <div id="scene-container"></div>
                 <div class="stats" id="stats">
                     <div class="stat-item">
                         <span class="stat-label">Microbots:</span>
@@ -34,13 +34,17 @@
                         <span class="stat-value" id="status">Inicializando...</span>
                     </div>
                 </div>
+                
+                <div class="controls-hint">
+                    <p>🖱️ Arraste para rotacionar | 🔄 Scroll para zoom | ⌨️ Setas para mover câmera</p>
+                </div>
             </div>
 
             <aside class="control-panel">
                 <div class="panel-section">
                     <h3>📝 Comandos</h3>
                     <div class="command-input">
-                        <input type="text" id="textInput" placeholder="Digite uma palavra ou comando..." maxlength="20">
+                        <input type="text" id="textInput" placeholder="Digite uma palavra..." maxlength="15">
                         <button id="formTextBtn" class="btn btn-primary">Formar Texto</button>
                     </div>
                 </div>
@@ -48,38 +52,34 @@
                 <div class="panel-section">
                     <h3>🎨 Formas Predefinidas</h3>
                     <div class="button-grid">
-                        <button class="btn btn-shape" data-shape="circle">Círculo</button>
-                        <button class="btn btn-shape" data-shape="square">Quadrado</button>
-                        <button class="btn btn-shape" data-shape="triangle">Triângulo</button>
+                        <button class="btn btn-shape" data-shape="sphere">Esfera</button>
+                        <button class="btn btn-shape" data-shape="cube">Cubo</button>
+                        <button class="btn btn-shape" data-shape="pyramid">Pirâmide</button>
                         <button class="btn btn-shape" data-shape="heart">Coração</button>
                         <button class="btn btn-shape" data-shape="star">Estrela</button>
-                        <button class="btn btn-shape" data-shape="spiral">Espiral</button>
+                        <button class="btn btn-shape" data-shape="helix">Hélice</button>
                     </div>
                 </div>
 
                 <div class="panel-section">
-                    <h3>🖼️ Símbolos</h3>
+                    <h3>🖼️ Símbolos 3D</h3>
                     <div class="button-grid">
                         <button class="btn btn-shape" data-shape="smile">😊 Smile</button>
                         <button class="btn btn-shape" data-shape="thumbsup">👍 Joia</button>
                         <button class="btn btn-shape" data-shape="spider">🕷️ Aranha</button>
-                        <button class="btn btn-shape" data-shape="arrow">➔ Seta</button>
-                        <button class="btn btn-shape" data-shape="infinity">∞ Infinito</button>
                         <button class="btn btn-shape" data-shape="wave">~ Onda</button>
                         <button class="btn btn-shape" data-shape="lightning">⚡ Raio</button>
-                        <button class="btn btn-shape" data-shape="peace">☮ Paz</button>
-                        <button class="btn btn-shape" data-shape="music">♪ Música</button>
-                        <button class="btn btn-shape" data-shape="sun">☀ Sol</button>
-                        <button class="btn btn-shape" data-shape="moon">☾ Lua</button>
                         <button class="btn btn-shape" data-shape="snow">❄️ Neve</button>
+                        <button class="btn btn-shape" data-shape="torus">🍩 Torus</button>
+                        <button class="btn btn-shape" data-shape="dna">🧬 DNA</button>
                     </div>
                 </div>
 
                 <div class="panel-section">
                     <h3>⚙️ Configurações</h3>
                     <div class="slider-control">
-                        <label for="botCountSlider">Quantidade de Microbots: <span id="botCountDisplay">500</span></label>
-                        <input type="range" id="botCountSlider" min="100" max="2000" value="500" step="100">
+                        <label for="botCountSlider">Quantidade de Microbots: <span id="botCountDisplay">300</span></label>
+                        <input type="range" id="botCountSlider" min="50" max="800" value="300" step="50">
                     </div>
                     <div class="slider-control">
                         <label for="speedSlider">Velocidade: <span id="speedDisplay">1.0x</span></label>
@@ -94,30 +94,44 @@
                 <div class="panel-section">
                     <h3>🎮 Controles</h3>
                     <div class="button-grid">
-                        <button id="drawBtn" class="btn btn-secondary">Modo Desenho</button>
                         <button id="disperseBtn" class="btn btn-secondary">Dispersar</button>
                         <button id="resetBtn" class="btn btn-secondary">Reiniciar</button>
                         <button id="pauseBtn" class="btn btn-secondary">Pausar</button>
+                        <button id="resetCameraBtn" class="btn btn-secondary">Reset Câmera</button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>🎥 Visualização</h3>
+                    <div class="button-grid">
+                        <button id="autoRotateBtn" class="btn btn-secondary">Auto-Rotação</button>
+                        <button id="gridBtn" class="btn btn-secondary">Grid</button>
+                        <button id="axesBtn" class="btn btn-secondary">Eixos</button>
+                        <button id="particlesBtn" class="btn btn-secondary">Partículas</button>
                     </div>
                 </div>
 
                 <div class="panel-section info-section">
-                    <h3>ℹ️ Sobre</h3>
+                    <h3>ℹ️ Sobre 3D</h3>
                     <p class="info-text">
-                        Este simulador demonstra comportamento emergente através de robótica swarm. 
-                        Cada microbot segue regras simples, mas juntos formam estruturas complexas.
+                        Versão tridimensional do simulador de robótica swarm. 
+                        Os microbots agora se movem em 3 dimensões com física espacial completa.
                     </p>
                     <p class="info-text">
-                        <strong>Conceitos:</strong> Sistemas Distribuídos, Agentes Autônomos, Comportamento Emergente
+                        <strong>Tecnologia:</strong> Three.js (WebGL), Algoritmos 3D de Swarm
                     </p>
                 </div>
             </aside>
         </div>
     </div>
 
-    <script src="microbot.js"></script>
-    <script src="swarm.js"></script>
-    <script src="shapes.js"></script>
-    <script src="main.js"></script>
+    <!-- Three.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <script src="microbot-3d.js"></script>
+    <script src="swarm-3d.js"></script>
+    <script src="shapes-3d.js"></script>
+    <script src="main-3d.js"></script>
 </body>
 </html>

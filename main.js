@@ -364,8 +364,8 @@ function formShape(shapeName) {
         case 'moon':
             points = ShapeGenerator.generateMoon(centerX, centerY, size * 0.5, swarm.bots.length);
             break;
-        case 'flower':
-            points = ShapeGenerator.generateFlower(centerX, centerY, size * 0.5, swarm.bots.length);
+        case 'snow':
+            points = ShapeGenerator.generateSnow(centerX, centerY, size * 0.6, swarm.bots.length);
             break;
         case 'thumbsup':
             points = ShapeGenerator.generateThumbsUp(centerX, centerY, size * 0.6, swarm.bots.length);

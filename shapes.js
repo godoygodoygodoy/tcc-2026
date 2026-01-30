@@ -812,4 +812,99 @@ class ShapeGenerator {
         
         return points;
     }
+    
+    /**
+     * Gera pontos para um floco de neve (❄️)
+     */
+    static generateSnow(centerX, centerY, size, numPoints = 500) {
+        const points = [];
+        const branches = 6; // Floco de neve tem 6 braços
+        const armLength = size * 0.6;
+        
+        // Centro do floco
+        const centerPoints = Math.floor(numPoints * 0.05);
+        const centerRadius = size * 0.05;
+        
+        for (let i = 0; i < centerPoints; i++) {
+            const angle = (i / centerPoints) * Math.PI * 2;
+            const r = centerRadius * Math.random();
+            
+            points.push({
+                x: centerX + Math.cos(angle) * r,
+                y: centerY + Math.sin(angle) * r
+            });
+        }
+        
+        // 6 braços principais
+        const pointsPerBranch = Math.floor((numPoints - centerPoints) / branches);
+        
+        for (let b = 0; b < branches; b++) {
+            const mainAngle = (b / branches) * Math.PI * 2;
+            const cos = Math.cos(mainAngle);
+            const sin = Math.sin(mainAngle);
+            
+            // Braço principal
+            const mainArmPoints = Math.floor(pointsPerBranch * 0.4);
+            for (let i = 0; i < mainArmPoints; i++) {
+                const t = i / mainArmPoints;
+                const distance = t * armLength;
+                const thickness = 3;
+                
+                points.push({
+                    x: centerX + cos * distance + (Math.random() - 0.5) * thickness,
+                    y: centerY + sin * distance + (Math.random() - 0.5) * thickness
+                });
+            }
+            
+            // Ramificações laterais (3 pares por braço)
+            const branchPairs = 3;
+            const branchPointsPerPair = Math.floor(pointsPerBranch * 0.3 / branchPairs);
+            
+            for (let bp = 0; bp < branchPairs; bp++) {
+                const branchDistance = (bp + 1) / (branchPairs + 1) * armLength;
+                const branchLength = armLength * 0.25;
+                
+                // Ramificação esquerda e direita
+                for (let side = -1; side <= 1; side += 2) {
+                    const branchAngle = mainAngle + side * (Math.PI / 4);
+                    const branchCos = Math.cos(branchAngle);
+                    const branchSin = Math.sin(branchAngle);
+                    
+                    for (let i = 0; i < branchPointsPerPair; i++) {
+                        const t = i / branchPointsPerPair;
+                        const startX = centerX + cos * branchDistance;
+                        const startY = centerY + sin * branchDistance;
+                        
+                        const x = startX + branchCos * branchLength * t;
+                        const y = startY + branchSin * branchLength * t;
+                        
+                        points.push({
+                            x: x + (Math.random() - 0.5) * 2,
+                            y: y + (Math.random() - 0.5) * 2
+                        });
+                    }
+                }
+            }
+            
+            // Pequenas ramificações nas pontas
+            const tipBranchPoints = Math.floor(pointsPerBranch * 0.1);
+            for (let side = -1; side <= 1; side += 2) {
+                const tipAngle = mainAngle + side * (Math.PI / 6);
+                const tipLength = armLength * 0.15;
+                
+                for (let i = 0; i < tipBranchPoints; i++) {
+                    const t = i / tipBranchPoints;
+                    const startX = centerX + cos * armLength;
+                    const startY = centerY + sin * armLength;
+                    
+                    points.push({
+                        x: startX + Math.cos(tipAngle) * tipLength * t + (Math.random() - 0.5) * 2,
+                        y: startY + Math.sin(tipAngle) * tipLength * t + (Math.random() - 0.5) * 2
+                    });
+                }
+            }
+        }
+        
+        return points;
+    }
 }
