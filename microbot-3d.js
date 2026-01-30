@@ -9,7 +9,7 @@ class Microbot3D {
     
     /**
      * Cria geometria procedural inspirada no Big Hero 6
-     * Formato hexagonal achatado com detalhes magnéticos
+     * Formato de hélice com duas lâminas e núcleo central esférico
      */
     static createBigHeroGeometry() {
         if (Microbot3D.sharedGeometry) {
@@ -18,58 +18,100 @@ class Microbot3D {
         
         const group = new THREE.Group();
         
-        // Corpo principal - hexágono achatado
-        const hexRadius = 2;
-        const hexHeight = 0.4;
-        const hexGeometry = new THREE.CylinderGeometry(hexRadius, hexRadius, hexHeight, 6);
-        const bodyMaterial = new THREE.MeshStandardMaterial({
-            color: 0x1a1a2e,
-            metalness: 0.9,
-            roughness: 0.2
-        });
-        const hexBody = new THREE.Mesh(hexGeometry, bodyMaterial);
-        group.add(hexBody);
-        
-        // Anel central luminoso
-        const ringGeometry = new THREE.TorusGeometry(1.2, 0.15, 8, 16);
-        const ringMaterial = new THREE.MeshStandardMaterial({
-            color: 0x00d4ff,
-            emissive: 0x00d4ff,
-            emissiveIntensity: 0.8,
-            metalness: 0.5,
-            roughness: 0.3
-        });
-        const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-        ring.rotation.x = Math.PI / 2;
-        group.add(ring);
-        
-        // Núcleo central (esfera pequena)
-        const coreGeometry = new THREE.SphereGeometry(0.5, 12, 12);
+        // Núcleo central esférico (com linhas/anéis)
+        const coreRadius = 0.8;
+        const coreGeometry = new THREE.SphereGeometry(coreRadius, 16, 12);
         const coreMaterial = new THREE.MeshStandardMaterial({
-            color: 0x00ffff,
-            emissive: 0x00ffff,
-            emissiveIntensity: 1.0,
-            metalness: 0.3,
+            color: 0x2a2a3e,
+            metalness: 0.9,
             roughness: 0.2
         });
         const core = new THREE.Mesh(coreGeometry, coreMaterial);
         group.add(core);
         
-        // Conectores magnéticos nas 6 pontas
-        const connectorGeometry = new THREE.SphereGeometry(0.3, 8, 8);
-        const connectorMaterial = new THREE.MeshStandardMaterial({
+        // Anéis metálicos ao redor do núcleo
+        const ringGeometry = new THREE.TorusGeometry(coreRadius + 0.1, 0.08, 8, 16);
+        const ringMaterial = new THREE.MeshStandardMaterial({
             color: 0x4a5568,
             metalness: 1.0,
             roughness: 0.1
         });
         
-        for (let i = 0; i < 6; i++) {
-            const angle = (i * Math.PI * 2) / 6;
-            const connector = new THREE.Mesh(connectorGeometry, connectorMaterial);
-            connector.position.x = Math.cos(angle) * hexRadius;
-            connector.position.z = Math.sin(angle) * hexRadius;
-            group.add(connector);
-        }
+        // Anel horizontal
+        const ring1 = new THREE.Mesh(ringGeometry, ringMaterial);
+        ring1.rotation.x = Math.PI / 2;
+        group.add(ring1);
+        
+        // Anel vertical
+        const ring2 = new THREE.Mesh(ringGeometry, ringMaterial);
+        group.add(ring2);
+        
+        // Duas lâminas/asas (formato de hélice)
+        const bladeLength = 3.5;
+        const bladeWidth = 1.2;
+        const bladeThickness = 0.15;
+        
+        // Geometria da lâmina (box alongada com pontas arredondadas)
+        const bladeShape = new THREE.Shape();
+        bladeShape.moveTo(-bladeLength/2, -bladeWidth/2);
+        bladeShape.lineTo(bladeLength/2, -bladeWidth/2);
+        bladeShape.lineTo(bladeLength/2, bladeWidth/2);
+        bladeShape.lineTo(-bladeLength/2, bladeWidth/2);
+        
+        const extrudeSettings = {
+            depth: bladeThickness,
+            bevelEnabled: true,
+            bevelThickness: 0.08,
+            bevelSize: 0.08,
+            bevelSegments: 3
+        };
+        
+        const bladeGeometry = new THREE.ExtrudeGeometry(bladeShape, extrudeSettings);
+        const bladeMaterial = new THREE.MeshStandardMaterial({
+            color: 0x3a3a4e,
+            metalness: 0.8,
+            roughness: 0.3
+        });
+        
+        // Lâmina 1
+        const blade1 = new THREE.Mesh(bladeGeometry, bladeMaterial);
+        blade1.position.z = -bladeThickness/2;
+        group.add(blade1);
+        
+        // Lâmina 2 (oposta, 180 graus)
+        const blade2 = new THREE.Mesh(bladeGeometry, bladeMaterial);
+        blade2.rotation.z = Math.PI;
+        blade2.position.z = -bladeThickness/2;
+        group.add(blade2);
+        
+        // Pontos luminosos nas extremidades das lâminas
+        const glowGeometry = new THREE.SphereGeometry(0.2, 8, 8);
+        const glowMaterial = new THREE.MeshStandardMaterial({
+            color: 0x00d4ff,
+            emissive: 0x00d4ff,
+            emissiveIntensity: 1.0,
+            metalness: 0.3,
+            roughness: 0.2
+        });
+        
+        // 4 pontos luminosos (nas 4 pontas)
+        const positions = [
+            new THREE.Vector3(bladeLength/2, 0, 0),
+            new THREE.Vector3(-bladeLength/2, 0, 0),
+            new THREE.Vector3(0, bladeLength/2, 0),
+            new THREE.Vector3(0, -bladeLength/2, 0)
+        ];
+        
+        positions.forEach(pos => {
+            const glow = new THREE.Mesh(glowGeometry, glowMaterial.clone());
+            glow.position.copy(pos);
+            group.add(glow);
+        });
+        
+        // Luz central
+        const centerGlowGeometry = new THREE.SphereGeometry(0.3, 12, 12);
+        const centerGlow = new THREE.Mesh(centerGlowGeometry, glowMaterial.clone());
+        group.add(centerGlow);
         
         Microbot3D.sharedGeometry = group;
         Microbot3D.modelLoaded = true;
@@ -341,7 +383,26 @@ class Microbot3D {
      */
     destroy(scene) {
         scene.remove(this.mesh);
-        this.mesh.geometry.dispose();
-        this.material.dispose();
+        
+        // Limpar geometrias e materiais
+        this.mesh.traverse((child) => {
+            if (child.isMesh) {
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) {
+                    if (Array.isArray(child.material)) {
+                        child.material.forEach(mat => mat.dispose());
+                    } else {
+                        child.material.dispose();
+                    }
+                }
+            }
+        });
+    }
+    
+    /**
+     * Alias para destroy() (compatibilidade)
+     */
+    dispose(scene) {
+        this.destroy(scene);
     }
 }
